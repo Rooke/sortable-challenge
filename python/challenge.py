@@ -18,7 +18,7 @@ def main():
     products = []
     prod_tree = Tree()
             
-    for line in codecs.open("./data/products.txt", encoding="UTF-8").readlines():
+    for line in codecs.open("../data/products.txt", encoding="UTF-8").readlines():
         product = json.loads(line)
         product['listings'] = list()
         product_tokens = product['product_name'].lower().replace('_', '-').split('-')
@@ -33,7 +33,7 @@ def main():
     match_count = 0
     total_listings = 0
 
-    for line in codecs.open("./data/listings.txt", encoding="UTF-8").readlines():
+    for line in codecs.open("../data/listings.txt", encoding="UTF-8").readlines():
         listing = json.loads(line)
         delimiters = " ", ",", "_", "-", "[", "]", "/", "+", ";", "®"
         regex_pattern = '|'.join(map(re.escape, delimiters))
