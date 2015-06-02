@@ -43,6 +43,7 @@ namespace ProductMatchingTree {
         auto children = product_tree.children;
     
         for(size_t i = 0; i < tokens.size()-1; i++){
+            // Try two adjacent tokens (in addition to the one by itself) 
             string cat_token = tokens[i] + tokens[i+1];
         
             auto leaf = leaves.find(tokens[i]);

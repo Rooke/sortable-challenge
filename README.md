@@ -1,12 +1,12 @@
-## To run:
-# Python Solution
+# To run:
+## Python Solution
 
 ```sh
 cd ./python
 ./challenge.py
 ```
 
-# C++ Solution
+## C++ Solution
 (note, a c++11-enabled compiler must be used)
 ```sh
 # Install necessary libraries
@@ -16,9 +16,11 @@ apt-get install libjsoncpp-dev libboost-dev
 cd ./cpp && make && ./challenge
 ```
 
+# Some Commentary
+
 ## Observations about the sample data
 
-A couple observations about the sample data lead to certain
+A few observations about the sample data lead to certain
 algorithmic strategies:
 
 * There are few if any errors in a given listing's model
@@ -28,7 +30,7 @@ algorithmic strategies:
   sense of Levenshtein or Jaro-Winkler) should be attempted with the
   model string. 
 * Model strings are inconsistent in their use of various delimiters,
-  e.g. spaces, dashes, and periods. For example, DSCS2100 should
+  e.g. spaces, dashes, and periods. To illustrate, DSCS2100 should
   probably match DSC-S2100.
 * Listings inconsistently include the product 'family' in the model
   string, especially among European listings e.g. "Sony Alpha
@@ -38,10 +40,18 @@ algorithmic strategies:
 Exact string matching is therefore employed in both solutions, using a
 "parse-tree" to speed up matching slightly.
 
-The other obvious categorization method is to score the price of each
+Other categorization methods involve classifying each listing by
+its supplementary data such as the matched product's 'announced-date'
+and 'price'. One strategy might involve scoring the price of each
 listing according to how far away from the mean price for that
 product, basically rejecting bizarre pricing. This is not done in
 either solution for the sake of simplicity.
+
+### What delimits a token?
+In general, the characters '._-,' are all considered as delimiters,
+and '[]/+;®' are considered junk characters. This means a title of
+'Sony - DSLR+A-230' will be overlooked. This is totally arbitrary, and
+it is hard to judge what non-alphanumeric characters should represent.
 
 ## Python Solution
 
@@ -50,21 +60,21 @@ A tree of tokens is created first, parsed from each
 tree is searched for a match. If there is a unique match, the match is
 deemed a success.
 
-e.g.
-
+A illustration of the tree structure:
+```
 Tree Depth (d) ->
 
-  d=1        d=2        d=3       d=4
--------   ---------    -----    -------
+   d=0      d=1        d=2        d=3       d=4
+ ------   -------   ---------    -----    -------
 
-       /  ALPHA     -  DSLR   - A230 
-SONY -
-       \  TX10
-
-                     / A5     - Zoom        
-CANON  -  POWERSHOT - 
-                     \ SD980  - IS
-
+                 /  ALPHA     -  DSLR   - A230 
+          SONY -
+       /         \  TX10
+(root)<
+       \                       / A5     - Zoom        
+          CANON  -  POWERSHOT - 
+                               \ SD980  - IS
+```
 
 
 The drawback to naively parsing the 'product_name' is that for
@@ -85,4 +95,9 @@ for the manufacturer, and one for the product name. The tradeoff is
 that search times increase, since there are more nodes at a given tree
 depth.
 
-
+Also used is a one-token 'look ahead' to match listings who's
+'product_name' has been erroneously tokenized (or at least tokenized
+rather aggressively). For example, 'Sony Alpha NEX 5' should match to
+the 'Sony NEX-5', but the tree path that should be followed looks like
+(SONY->NEX5) due to delimiter elimination. When 'NEX' and '5' are
+concatenated, it will correctly match the 'NEX5' tree node.
