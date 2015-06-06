@@ -69,9 +69,9 @@ Tree Depth (d) ->
 
                  /  ALPHA     -  DSLR   - A230 
           SONY -
-       /         \  TX10
-(root)<
-       \                       / A5     - Zoom        
+        /        \  TX10
+(root)-
+        \                      / A5     - Zoom        
           CANON  -  POWERSHOT - 
                                \ SD980  - IS
 ```
@@ -92,8 +92,8 @@ A very similar strategy to the Python solution is used. To combat the
 missing family string problem from the python solution, a slight
 modification is made. The tree is formed with two levels - one for
 for the manufacturer, and one for the product name. The tradeoff is
-that search times increase, since there are more nodes at a given tree
-depth.
+that search times increase, since there are more node children at a
+given node.
 
 Also used is a one-token 'look ahead' to match listings who's
 'product_name' has been erroneously tokenized (or at least tokenized

@@ -20,7 +20,7 @@ def main():
             
     for line in codecs.open("../data/products.txt", encoding="UTF-8").readlines():
         product = json.loads(line)
-        product['listings'] = list()
+        product['listings'] = []
         product_tokens = product['product_name'].lower().replace('_', '-').split('-')
 
         tree = prod_tree        
@@ -39,7 +39,7 @@ def main():
         regex_pattern = '|'.join(map(re.escape, delimiters))
         listing_tokens = re.split(regex_pattern, listing['title'].lower())
         
-        mlist = list()
+        mlist = []
         search(listing_tokens, prod_tree, mlist)
         total_listings += 1
         
