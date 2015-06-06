@@ -40,18 +40,22 @@ namespace ProductMatchingTree {
         auto leaves = product_tree.products;
         auto children = product_tree.children;
     
-        for(size_t i = 0; i < tokens.size()-1; i++){
-            // Try two adjacent tokens (in addition to the one by itself) 
-            string cat_token = tokens[i] + tokens[i+1];
+        for(size_t i = 0; i < tokens.size(); i++){
         
             auto leaf = leaves.find(tokens[i]);
             auto child = children.find(tokens[i]);
-            if(leaf == leaves.end()){
-                leaf = leaves.find(cat_token);
+            
+            if( i != tokens.size()-1 ) {
+                // Try two adjacent tokens when possible 
+                string cat_token = tokens[i] + tokens[i+1];
+                if(leaf == leaves.end()){
+                    leaf = leaves.find(cat_token);
+                }
+                if(child == children.end()){
+                    child = children.find(cat_token);
+                }
             }
-            if(child == children.end()){
-                child = children.find(cat_token);
-            }
+            
             if(leaf != leaves.end()){
                 matches.push_back(leaf->second);
             }
