@@ -7,12 +7,16 @@ cd ./python
 ```
 
 ## C++ Solution
-(note, a c++11-enabled compiler must be used)
+The solution uses two libraries - <a href="http://www.boost.org//">Boost</a> and <a href="https://github.com/open-source-parsers/jsoncpp">JsonCpp</a>.
+To install these libraries on a debian/ubuntu system, use the
+following command:
 ```sh
 # Install necessary libraries
 apt-get install libjsoncpp-dev libboost-dev
-
-# make and run
+```
+Once installed, 
+```sh
+# make and run (note, a c++11-enabled compiler must be used)
 cd ./cpp && make && ./challenge
 ```
 
