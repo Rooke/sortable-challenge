@@ -14,24 +14,22 @@ using namespace std;
 
 namespace ProductMatchingTree {
 
-    struct Product {
-        Json::Value json;
-    };
+    typedef Json::Value Product;
     
     struct ProductNode {
         std::map<std::string, ProductNode> children;
         std::map<std::string, std::shared_ptr<Product>> products;
     };
 
-    void print_tree(const ProductNode &product_tree, ostream &out){
+    ostream& operator<<(std::ostream &stream, const ProductNode &product_tree){
         
-        for(auto child : product_tree.children) {
-            print_tree(child.second, out);
+        for(const auto &child : product_tree.children) {
+            stream << child.second;
         }
-        for(auto leaf : product_tree.products) {
+        for(const auto &leaf : product_tree.products) {
             Json::FastWriter writer; // remove to default to 'human-readable' json
-            auto product = leaf.second;
-            out << writer.write(product->json);
+            const auto &product = leaf.second;
+            stream << writer.write(*product);
         }
     }
 
@@ -92,12 +90,12 @@ namespace ProductMatchingTree {
             model.erase(boost::remove_if(model, boost::is_any_of(dubious_delimiters)), model.end());
             transform(model.begin(), model.end(), model.begin(), ::toupper);
 
-            auto new_product = make_shared<Product>();
-            new_product->json["product"] = product_json;
-        
+
             // Construct a shallow, two-level tree
             ProductNode &product_child = product_tree.children[manu];
-            product_child.products[model] = new_product;
+            product_child.products[model] = shared_ptr<Product>(new Product());
+            (*product_child.products[model])["product"] = product_json;
+
         }
 
         for (string line; getline(listings_file, line); ){
@@ -122,12 +120,11 @@ namespace ProductMatchingTree {
 
             // if we get an unambiguous result from the search, assume success
             if(results.size() == 1) {
-                auto product = results[0];
-                product->json["listings"].append(listing_json);
+                const auto &product = results[0];
+                (*product)["listings"].append(listing_json);
             }
         }
-
-        print_tree(product_tree, results_file);
+        results_file << product_tree;
     }
 }
         
