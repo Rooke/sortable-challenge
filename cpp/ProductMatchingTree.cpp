@@ -37,22 +37,31 @@ namespace ProductMatchingTree {
                             const vector<string> &tokens,
                             vector<shared_ptr<Product>> &matches){
         
-        auto leaves = product_tree.products;
-        auto children = product_tree.children;
+        auto &leaves = product_tree.products;
+        auto &children = product_tree.children;
     
         for(size_t i = 0; i < tokens.size(); i++){
         
             auto leaf = leaves.find(tokens[i]);
             auto child = children.find(tokens[i]);
-            
-            if( i != tokens.size()-1 ) {
-                // Try two adjacent tokens when possible 
-                string cat_token = tokens[i] + tokens[i+1];
-                if(leaf == leaves.end()){
-                    leaf = leaves.find(cat_token);
-                }
-                if(child == children.end()){
-                    child = children.find(cat_token);
+
+            static const size_t LOOKAHEAD_MAX = 2;
+
+            for(size_t lookahead = 1; lookahead <= LOOKAHEAD_MAX; lookahead++){
+
+                if( lookahead < tokens.size() && i < tokens.size()-lookahead ) {
+
+                    // Try n adjacent tokens when possible
+                    string cat_token;
+                    for(size_t j = 0; j <= lookahead; j++) {
+                        cat_token += tokens[i+j];
+                    }
+                    if(leaf == leaves.end()){
+                        leaf = leaves.find(cat_token);
+                    }
+                    if(child == children.end()){
+                        child = children.find(cat_token);
+                    }
                 }
             }
             
@@ -67,10 +76,10 @@ namespace ProductMatchingTree {
 
     const static string dubious_delimiters = "._-, ";
     const static string junk_characters = "[]/+;®";
-    
-    void match_listings(ofstream &results_file,
-                        ifstream &listings_file,
-                        ifstream &products_file){
+
+    int match_listings(ofstream &results_file,
+                       ifstream &listings_file,
+                       ifstream &products_file){
     
         Json::Value product_json;   
         Json::Value listing_json;   
@@ -94,14 +103,15 @@ namespace ProductMatchingTree {
             model.erase(boost::remove_if(model, boost::is_any_of(dubious_delimiters)), model.end());
             transform(model.begin(), model.end(), model.begin(), ::toupper);
 
-
             // Construct a shallow, two-level tree
             ProductNode &product_child = product_tree.children[manu];
             product_child.products[model] = shared_ptr<Product>(new Product());
             (*product_child.products[model])["product"] = product_json;
 
         }
-
+                
+        int total_matches = 0;
+        
         for (string line; getline(listings_file, line); ){
 
             if(!reader.parse(line, listing_json, false)){
@@ -126,9 +136,11 @@ namespace ProductMatchingTree {
             if(results.size() == 1) {
                 const auto &product = results[0];
                 (*product)["listings"].append(listing_json);
+                total_matches++;
             }
         }
         results_file << product_tree;
+        return total_matches;
     }
 }
         
@@ -147,8 +159,8 @@ int main() {
         return(EXIT_FAILURE);
     }
 
-    ProductMatchingTree::match_listings(results_file, listings_file, products_file);
-    cout << "results.txt successfullly written" << endl;
+    int matches = ProductMatchingTree::match_listings(results_file, listings_file, products_file);
+    cout << "results.txt successfullly written (" << matches << " listings categorized)" << endl;
 
     return(EXIT_SUCCESS);
 }
