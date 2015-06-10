@@ -2,7 +2,6 @@
 #include <jsoncpp/json/reader.h>
 #include <jsoncpp/json/writer.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/range/algorithm/remove_if.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -31,6 +30,7 @@ namespace ProductMatchingTree {
             const auto &product = leaf.second;
             stream << writer.write(*product);
         }
+        return stream;
     }
 
     void search_for_product(const ProductNode &product_tree,
@@ -100,13 +100,13 @@ namespace ProductMatchingTree {
             transform(manu.begin(), manu.end(), manu.begin(), ::toupper);
         
             string model = product_json.get("model", "").asString();
-            model.erase(boost::remove_if(model, boost::is_any_of(dubious_delimiters)), model.end());
+            model.erase(remove_if(model.begin(), model.end(), boost::is_any_of(dubious_delimiters)), model.end());
             transform(model.begin(), model.end(), model.begin(), ::toupper);
 
             // Construct a shallow, two-level tree
             ProductNode &product_child = product_tree.children[manu];
             product_child.products[model] = shared_ptr<Product>(new Product());
-            (*product_child.products[model])["product"] = product_json;
+            (*product_child.products[model])["product_name"] = product_json.get("product_name", "").asString();
 
         }
                 
@@ -123,11 +123,16 @@ namespace ProductMatchingTree {
 
             string title = listing_json.get("title", "" ).asString();
 
-            title.erase(boost::remove_if(title, boost::is_any_of(junk_characters)), title.end());
+            title.erase(remove_if(title.begin(), title.end(), boost::is_any_of(junk_characters)), title.end());
             transform(title.begin(), title.end(), title.begin(), ::toupper);
 
             vector<string> title_tokens;
             boost::split(title_tokens, title, boost::is_any_of(dubious_delimiters));
+            // superfluous spaces cause blank tokens, so remove them:
+            title_tokens.erase(remove_if(title_tokens.begin(),
+                                         title_tokens.end(),
+                                         [](string &s){return s.empty();}),
+                               title_tokens.end());
         
             vector<shared_ptr<Product>> results;
             search_for_product(product_tree, title_tokens, results);

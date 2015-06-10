@@ -38,7 +38,8 @@ algorithmic strategies:
   probably match DSC-S2100.
 * Listings inconsistently include the product 'family' in the model
   string, especially among European listings e.g. "Sony Alpha
-  DSLR-A230" vs. "Sony - DSLR-A230".
+  DSLR-A230" vs. "Sony - DSLR-A230". There are some differences in
+  European naming conventions which is confusing even for humans.
 * In general, things are case-insensitive (e.g Canon === CANON)
 
 Exact string matching is therefore employed in both solutions, using a
@@ -59,7 +60,7 @@ it is hard to judge what non-alphanumeric characters should represent.
 
 ## Python Solution
 
-A tree of tokens is created first, parsed from each
+A tree of tokens is created first, parsed from each product's
 'product_name'. Then, each listing's 'name' field is parsed, and the
 tree is searched for a match. If there is a unique match, the match is
 deemed a success.
@@ -99,7 +100,7 @@ for the manufacturer, and one for the product name. The tradeoff is
 that search times increase, since there are more node children at a
 given node.
 
-Also used is a one-token 'look ahead' to match listings who's
+Also used is a variable-token 'look ahead' to match listings who's
 'product_name' has been erroneously tokenized (or at least tokenized
 rather aggressively). For example, 'Sony Alpha NEX 5' should match to
 the 'Sony NEX-5', but the tree path that should be followed looks like
