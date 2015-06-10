@@ -1,0 +1,16 @@
+[
+    {
+        "name":"cpp",
+        "working_dir": "../cpp/",
+        "command":"./challenge",
+        "command_args":[],
+        "result":"../cpp/results.txt"
+    },
+    {
+        "name":"python",
+        "working_dir": "../python",
+        "command":"./challenge.py",
+        "command_args":  [],
+        "result":"../python/results.txt"
+    }
+]
